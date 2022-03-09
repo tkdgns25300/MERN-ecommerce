@@ -4,8 +4,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
-
 const app = express();
+
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
@@ -13,18 +15,17 @@ app.use(fileUpload({
     useTempFiles: true,
 }))
 
+
+// Routes
+app.use('/user', require('./routes/userRouter'))
+
+
 // Connect to mongodb
 const URI = process.env.MONGODB_URL;
 mongoose.connect(URI)
 .then(() => console.log('Connected to MongoDB..'))
 .catch(err => {
     throw err
-})
-
-
-// Routes
-app.get('/', (req, res) => {
-    res.json({msg : "Welcome my website!"})
 })
 
 
