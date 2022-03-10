@@ -28,7 +28,8 @@ const userCtrl = {
             const refreshtoken = createRefrechToken({ id: newUser._id });
 
             res.cookie('refreshtoken', refreshtoken, {
-                httpOnly: true
+                httpOnly: true,
+                path: '/user/refresh_token'
             })
 
             res.json({ accesstoken })
@@ -52,11 +53,20 @@ const userCtrl = {
             const refreshtoken = createRefrechToken({ id: user._id });
 
             res.cookie('refreshtoken', refreshtoken, {
-                httpOnly: true
+                httpOnly: true,
+                path: '/user/refresh_token'
             })
 
             res.json({ accesstoken })
 
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    logout: async (req, res) => {
+        try {
+            res.clearCookie('refreshtoken', { path: '/user/refresh_token' });
+            return res.json({msg: "Logged out"})
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -77,6 +87,9 @@ const userCtrl = {
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
+    },
+    getUser: (req, res) => {
+        
     }
 }
 
