@@ -28,8 +28,31 @@ const userCtrl = {
             const refreshtoken = createRefrechToken({ id: newUser._id });
 
             res.cookie('refreshtoken', refreshtoken, {
-                httpOnly: true,
-                path: '/user/refresh_token'
+                httpOnly: true
+            })
+
+            res.json({ accesstoken })
+
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    login: async (req, res) => {
+        try {
+            const { email, password } = req.body;
+
+            const user = await Users.findOne({ email });
+            if (!user) return res.status(400).json({msg: "User does not exist."})
+
+            const isMatch = await bcrypt.compare(password, user.password)
+            if (!isMatch) return res.status(400).json({msg: "Incorrect password."})
+            
+            // If login success, create access token and refresh token
+            const accesstoken = createAccessToken({ id: user._id });
+            const refreshtoken = createRefrechToken({ id: user._id });
+
+            res.cookie('refreshtoken', refreshtoken, {
+                httpOnly: true
             })
 
             res.json({ accesstoken })
