@@ -21,32 +21,45 @@ class APIfeatures {
     //    lte = lesser than or equal
     //    lt = lesser than
     //    gt = greater than
-    this.query.find(JSON.parse(queryStr))
-    
+    this.query.find(JSON.parse(queryStr));
+
     return this;
   }
 
   sorting() {
-    if(this.queryString.sort){
-        const sortBy = this.queryString.sort.split(',').join(' ');
-        this.query = this.query.sort(sortBy);
+    if (this.queryString.sort) {
+      const sortBy = this.queryString.sort.split(",").join(" ");
+      this.query = this.query.sort(sortBy);
     } else {
-        this.query = this.query.sort('-createdAt')
+      this.query = this.query.sort("-createdAt");
     }
 
     return this;
   }
-  
-  paginating() {}
+
+  paginating() {
+    const page = this.queryString.page * 1 || 1
+    const limit = this.queryString.limit * 1 || 9
+    const skip = (page - 1) * limit;
+    this.query = this.query.skip(skip).limit(limit)
+    return this;
+  }
 }
 
 const productCtrl = {
   getProducts: async (req, res) => {
     try {
-      const features = new APIfeatures(Products.find(), req.query).filtering().sorting();
+      const features = new APIfeatures(Products.find(), req.query)
+        .filtering()
+        .sorting()
+        .paginating();
       const products = await features.query;
 
-      res.json(products);
+      res.json({
+          status: 'success',
+          result: products.length,
+          products: products
+      });
     } catch (err) {
       return res.status(500).json({ msg: err.message });
     }
